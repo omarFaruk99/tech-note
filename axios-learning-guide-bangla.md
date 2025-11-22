@@ -527,6 +527,237 @@ export default function TodoApp() {
 
 _শুভকামনা! এই প্রজেক্টটি সম্পন্ন করলে আপনি একজন জুনিয়র ডেভেলপার হিসেবে পুরোপুরি প্রস্তুত।_
 
+---
+
+## ১১. অ্যাডভান্সড ফিচার (Advanced Features)
+
+এখন আমরা দেখব কিভাবে Axios কে আরও শক্তিশালীভাবে ব্যবহার করা যায়। এই ফিচারগুলো বড় অ্যাপ্লিকেশনে পারফরম্যান্স এবং ইউজার এক্সপেরিয়েন্স উন্নত করতে সাহায্য করে।
+
+### ১. রিকোয়েস্ট ক্যান্সেলেশন (Request Cancellation)
+
+**কেন দরকার?**
+ধরুন ইউজার সার্চ বারে কিছু টাইপ করছে। প্রতি ক্যারেক্টার টাইপ করার সাথে সাথে যদি API কল যায়, তাহলে আগের রিকোয়েস্টগুলো অপ্রয়োজনীয় হয়ে পড়ে এবং সার্ভারে চাপ দেয়। `AbortController` ব্যবহার করে আমরা আগের রিকোয়েস্ট বাতিল করতে পারি।
+
+**কোড উদাহরণ (Search Component):**
+
+`src/components/SearchBox.js`
+
+```javascript
+import { useEffect, useState } from "react";
+import api from "@/lib/axios";
+
+export default function SearchBox() {
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState([]);
+
+  useEffect(() => {
+    // ১. AbortController তৈরি
+    const controller = new AbortController();
+
+    const fetchResults = async () => {
+      try {
+        const response = await api.get("/search", {
+          params: { q: query },
+          signal: controller.signal, // ২. সিগন্যাল পাস করা
+        });
+        setResults(response.data);
+      } catch (error) {
+        // ৩. যদি ক্যান্সেল করা হয়, তাহলে এরর ইগনোর করুন
+        if (api.isCancel(error)) {
+          console.log("Request canceled:", error.message);
+        } else {
+          console.error("Search error:", error);
+        }
+      }
+    };
+
+    if (query) fetchResults();
+
+    // ৪. ক্লিনআপ ফাংশন (নতুন টাইপ করলে আগেরটা ক্যান্সেল হবে)
+    return () => {
+      controller.abort();
+    };
+  }, [query]);
+
+  return (
+    <input
+      type="text"
+      value={query}
+      onChange={(e) => setQuery(e.target.value)}
+      placeholder="Search..."
+      className="border p-2 rounded w-full"
+    />
+  );
+}
 ```
 
+### ২. অটোমেটিক রি-ট্রাই লজিক (Automatic Retry)
+
+নেটওয়ার্ক ফেইল করলে বা সার্ভার সাময়িক ডাউন থাকলে অটোমেটিক পুনরায় চেষ্টা করার জন্য `axios-retry` ব্যবহার করা হয়।
+
+**ইনস্টলেশন:**
+
+```bash
+npm install axios-retry
+```
+
+**কনফিগারেশন (`src/lib/axios.js`):**
+
+```javascript
+import axios from "axios";
+import axiosRetry from "axios-retry";
+
+const api = axios.create({ baseURL: "https://api.example.com" });
+
+// রি-ট্রাই কনফিগারেশন
+axiosRetry(api, {
+  retries: 3, // সর্বোচ্চ ৩ বার চেষ্টা করবে
+  retryDelay: axiosRetry.exponentialDelay, // ধাপে ধাপে সময় বাড়াবে (1s, 2s, 4s...)
+  retryCondition: (error) => {
+    // শুধুমাত্র নেটওয়ার্ক এরর বা 5xx এররে রি-ট্রাই করবে
+    return (
+      axiosRetry.isNetworkOrIdempotentRequestError(error) ||
+      error.response?.status >= 500
+    );
+  },
+});
+
+export default api;
+```
+
+### ৩. রেসপন্স ট্রান্সফরমেশন (Response Transformation)
+
+ব্যাকএন্ড থেকে আসা ডাটা ফ্রন্টএন্ডে ব্যবহারের উপযোগী করতে আমরা গ্লোবালি ডাটা ট্রান্সফর্ম করতে পারি। যেমন: তারিখের স্ট্রিং কে `Date` অবজেক্টে রূপান্তর করা।
+
+**কোড উদাহরণ (`src/lib/axios.js`):**
+
+```javascript
+api.interceptors.response.use((response) => {
+  // যদি রেসপন্সে date ফিল্ড থাকে, সেটাকে Date অবজেক্ট বানাবে
+  if (response.data && response.data.createdAt) {
+    response.data.createdAt = new Date(response.data.createdAt);
+  }
+
+  // নেস্টেড ডাটা ফ্ল্যাট করা (যদি দরকার হয়)
+  // যেমন: { data: { results: [...] } } -> [...]
+  if (response.data.data && response.data.results) {
+    return response.data.results;
+  }
+
+  return response;
+});
+```
+
+### ৪. ফাইল আপলোড ও প্রোগ্রেস বার (File Upload with Progress)
+
+ফাইল আপলোডের সময় ইউজারকে প্রোগ্রেস দেখানো ভালো UX।
+
+**কোড উদাহরণ (`src/components/FileUpload.js`):**
+
+```javascript
+import { useState } from "react";
+import api from "@/lib/axios";
+
+export default function FileUpload() {
+  const [progress, setProgress] = useState(0);
+  const [preview, setPreview] = useState(null);
+
+  const handleUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // প্রিভিউ সেট করা
+    setPreview(URL.createObjectURL(file));
+
+    // FormData তৈরি
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      await api.post("/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        onUploadProgress: (progressEvent) => {
+          // প্রোগ্রেস ক্যালকুলেশন
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
+          setProgress(percentCompleted);
+        },
+      });
+      alert("আপলোড সম্পন্ন!");
+    } catch (error) {
+      console.error("Upload failed", error);
+    }
+  };
+
+  return (
+    <div className="p-4 border rounded">
+      <input type="file" onChange={handleUpload} />
+
+      {preview && (
+        <img
+          src={preview}
+          alt="Preview"
+          className="mt-2 w-32 h-32 object-cover"
+        />
+      )}
+
+      {progress > 0 && (
+        <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+          <div
+            className="bg-blue-600 h-2.5 rounded-full"
+            style={{ width: `${progress}%` }}
+          ></div>
+          <p className="text-xs text-right mt-1">{progress}%</p>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### ৫. টাইপস্ক্রিপ্ট ইন্টিগ্রেশন (TypeScript Integration)
+
+টাইপস্ক্রিপ্ট ব্যবহার করলে কোড আরও নিরাপদ হয় এবং অটো-কমপ্লিসন পাওয়া যায়।
+
+**টাইপ ডেফিনিশন (`src/types/api.ts`):**
+
+```typescript
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+export interface ApiResponse<T> {
+  data: T;
+  message: string;
+  status: number;
+}
+```
+
+**সার্ভিস ফাংশন (`src/services/userService.ts`):**
+
+```typescript
+import api from "@/lib/axios";
+import { User, ApiResponse } from "@/types/api";
+
+// জেনেরিক টাইপ ব্যবহার
+export const getUser = async (id: number): Promise<User> => {
+  // Axios কে বলে দেওয়া রেসপন্স টাইপ কি হবে
+  const response = await api.get<ApiResponse<User>>(`/users/${id}`);
+  return response.data.data; // এখানে টাইপ সেফটি পাবেন
+};
+
+// এরর হ্যান্ডলিং টাইপ
+import { AxiosError } from "axios";
+
+export const handleError = (error: unknown) => {
+  if (axios.isAxiosError(error)) {
+    const axiosError = error as AxiosError<{ message: string }>;
+    console.error(axiosError.response?.data?.message || "API Error");
+  } else {
+    console.error("Unexpected Error", error);
+  }
+};
 ```
