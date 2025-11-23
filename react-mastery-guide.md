@@ -1535,4 +1535,20 @@ Project deploy করার আগে check করুন:
 
 ---
 
+## 33. Folder & File Naming Conventions
+
+| Type       | Convention           | Example           |
+| ---------- | -------------------- | ----------------- |
+| Components | PascalCase           | `Button.jsx`      |
+| Pages      | PascalCase           | `HomePage.jsx`    |
+| Hooks      | camelCase + use      | `useAuth.js`      |
+| Utils      | camelCase            | `formatDate.js`   |
+| Services   | camelCase            | `apiService.js`   |
+| Contexts   | PascalCase + Context | `AuthContext.jsx` |
+| Constants  | UPPERCASE            | `API_KEYS.js`     |
+| Folders    | lowercase plural     | `components/`     |
+| Types      | PascalCase           | `User.types.ts`   |
+
+---
+
 **শুভকামনা!** এই গাইডটি ফলো করলে এবং প্রজেক্ট বানালে আপনি নিশ্চিতভাবেই একজন দক্ষ React ডেভেলপার হিসেবে নিজেকে তৈরি করতে পারবেন।
