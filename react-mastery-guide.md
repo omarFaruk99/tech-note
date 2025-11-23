@@ -114,6 +114,19 @@ npm run dev
 
 ### Recommended Folder Structure
 
+একটি স্কেলেবল এবং মেইনটেইনেবল React অ্যাপ্লিকেশনের জন্য নিচের ফোল্ডার স্ট্রাকচারটি অনুসরণ করা যেতে পারে:
+
+##### Page vs. Component: The Golden Rule
+
+কম্পোনেন্ট এবং পেজের মধ্যে পার্থক্য বোঝার জন্য একটি সহজ "গোল্ডেন রুল" মনে রাখতে পারেন:
+
+**নিজেকে জিজ্ঞাসা করুন:** "এটার কি কোনো নির্দিষ্ট URL বা রাউট আছে?"
+
+- **যদি 'হ্যাঁ' হয়:** তাহলে এটি একটি **Page**।
+- **যদি 'না' হয়:** তাহলে এটি একটি **Component**।
+
+এই সহজ নিয়মটি আপনার কোডবেসকে আরও সুসংগঠিত রাখতে সাহায্য করবে।
+
 একটি স্কেলেবল অ্যাপের জন্য এই স্ট্রাকচার ফলো করুন:
 
 ```
@@ -218,7 +231,30 @@ return (
 );
 ```
 
----
+**`div` vs. `Fragment` - কখন কোনটি ব্যবহার করবেন?**
+
+- **`div` ব্যবহার করুন যখন:** আপনার UI-তে একটি অতিরিক্ত DOM নোড (যেমন, একটি কন্টেইনার বা লেআউট এলিমেন্ট) প্রয়োজন হয় এবং আপনি সেটিকে স্টাইল বা অ্যাট্রিবিউট দিতে চান।
+  ```jsx
+  // div ব্যবহার করা হয়েছে কারণ এটি একটি স্টাইলড কন্টেইনার হিসেবে কাজ করছে
+  return (
+    <div className="card-container">
+      <h1>Product Name</h1>
+      <p>Product Description</p>
+    </div>
+  );
+  ```
+- **`Fragment` (`<>...</>`) ব্যবহার করুন যখন:** আপনার একাধিক এলিমেন্টকে গ্রুপ করার প্রয়োজন, কিন্তু আপনি DOM-এ কোনো অতিরিক্ত নোড যোগ করতে চান না। এটি বিশেষ করে যখন আপনি একটি কম্পোনেন্ট থেকে একাধিক চাইল্ড এলিমেন্ট রিটার্ন করছেন এবং প্যারেন্ট এলিমেন্টের কোনো সিমেন্টিক বা স্টাইলিং প্রয়োজন নেই।
+  ```jsx
+  // Fragment ব্যবহার করা হয়েছে কারণ এখানে অতিরিক্ত div এর প্রয়োজন নেই
+  return (
+    <>
+      <h1>User Profile</h1>
+      <p>Email: user@example.com</p>
+      <button>Edit</button>
+    </>
+  );
+  ```
+  Fragment ব্যবহার করলে আপনার DOM ট্রি পরিষ্কার থাকে এবং অপ্রয়োজনীয় নোড তৈরি হয় না, যা পারফরম্যান্সের জন্য ভালো।
 
 ## 5. Components (Functional Components Only)
 
@@ -291,7 +327,12 @@ function Counter() {
   return (
     <div>
       <p>Count: {count}</p>
-      <button onClick={() => setCount(count + 1)}>Increment</button>
+      <button onClick={() => setCount((prevCount) => prevCount + 1)}>
+        Increment
+      </button>
+      <button onClick={() => setCount(count - 1)}>Decrement</button>
+      {/* Note: স্টেটের আপডেট ফাংশন `setCount` ব্যবহার করার সময় `setCount(prevCount => prevCount + 1)` এই সিনট্যাক্সটি ব্যবহার করা নিরাপদ। এটি নিশ্চিত করে যে আপনি সবসময় স্টেটের সর্বশেষ ভ্যালুর উপর ভিত্তি করে আপডেট করছেন।
+      যদি আপনি `setCount(count + 1)` ব্যবহার করেন, তাহলে একাধিক অ্যাসিঙ্ক্রোনাস আপডেট বা ব্যাচড আপডেটের ক্ষেত্রে `count` এর মান পুরনো হতে পারে, যার ফলে অপ্রত্যাশিত ফলাফল আসতে পারে। ফাংশনাল আপডেট এই ধরনের রেসকন্ডিশন এড়াতে সাহায্য করে। */}
     </div>
   );
 }
@@ -905,6 +946,592 @@ React বেসিক শেষ করার পর যা শিখবেন:
 2. **TypeScript:** টাইপ সেফটির জন্য।
 3. **Redux Toolkit / Zustand:** কমপ্লেক্স স্টেট ম্যানেজমেন্ট।
 4. **Unit Testing:** Jest & React Testing Library.
+
+---
+
+## 25. Error Boundaries (Production Must-Have)
+
+### 1. Error Boundary কি এবং কেন জরুরি
+
+- একটি component crash করলে পুরো app crash থেকে বাঁচানো
+- User-friendly error message
+- Production-এ mandatory
+
+### 2. Modern Approach: react-error-boundary Library
+
+```bash
+npm install react-error-boundary
+```
+
+Complete implementation:
+
+```jsx
+import { ErrorBoundary } from "react-error-boundary";
+
+function ErrorFallback({ error, resetErrorBoundary }) {
+  return (
+    <div className="error-container">
+      <h2>⚠️ কিছু একটা সমস্যা হয়েছে</h2>
+      <pre style={{ color: "red" }}>{error.message}</pre>
+      <button onClick={resetErrorBoundary}>আবার চেষ্টা করুন</button>
+    </div>
+  );
+}
+
+// App.jsx এ
+function App() {
+  return (
+    <ErrorBoundary
+      FallbackComponent={ErrorFallback}
+      onError={(error) => console.log("Logged:", error)}
+    >
+      <YourApp />
+    </ErrorBoundary>
+  );
+}
+```
+
+### 3. Testing Error Boundary
+
+- Test component যা intentional error throw করে
+- কিভাবে verify করবেন
+
+---
+
+## 26. Environment Variables (Configuration)
+
+### 1. Vite এ Environment Variables
+
+- `.env` file তৈরি:
+
+```env
+VITE_API_URL=https://api.example.com
+VITE_API_KEY=your-key-here
+```
+
+- Access করা:
+
+```jsx
+const apiUrl = import.meta.env.VITE_API_URL;
+```
+
+### 2. Different Environments
+
+- `.env.local` - Local development
+- `.env.development` - Development
+- `.env.production` - Production
+
+### 3. Config File Pattern
+
+```js
+// src/config/index.js
+export const config = {
+  apiUrl: import.meta.env.VITE_API_URL,
+  isDev: import.meta.env.DEV,
+};
+```
+
+---
+
+## 27. useReducer Hook (Complex State)
+
+### 1. কখন useReducer ব্যবহার করবেন
+
+- Multiple related states
+- Complex state logic
+- State transitions
+
+### 2. Complete Todo App with useReducer
+
+```jsx
+const todoReducer = (state, action) => {
+  switch (action.type) {
+    case "ADD":
+      return [...state, { id: Date.now(), text: action.text, done: false }];
+    case "TOGGLE":
+      return state.map((todo) =>
+        todo.id === action.id ? { ...todo, done: !todo.done } : todo
+      );
+    case "DELETE":
+      return state.filter((todo) => todo.id !== action.id);
+    default:
+      return state;
+  }
+};
+
+function TodoApp() {
+  const [todos, dispatch] = useReducer(todoReducer, []);
+
+  const addTodo = (text) => dispatch({ type: "ADD", text });
+  const toggleTodo = (id) => dispatch({ type: "TOGGLE", id });
+  const deleteTodo = (id) => dispatch({ type: "DELETE", id });
+
+  // UI rendering...
+}
+```
+
+---
+
+## 28. Authentication Pattern (Complete Flow)
+
+### 1. AuthContext Setup
+
+```jsx
+// context/AuthContext.jsx
+import { createContext, useContext, useState, useEffect } from "react";
+
+const AuthContext = createContext();
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Check for existing token on mount
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      // Verify token and set user
+      verifyToken(token)
+        .then((userData) => {
+          setUser(userData);
+        })
+        .catch(() => {
+          localStorage.removeItem("token");
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
+  const login = async (email, password) => {
+    const { token, user } = await loginAPI(email, password);
+    localStorage.setItem("token", token);
+    setUser(user);
+  };
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, login, logout, loading }}>
+      {!loading && children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => useContext(AuthContext);
+```
+
+### 2. Protected Routes Component
+
+```jsx
+import { Navigate } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
+
+const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) return <div>Loading...</div>;
+  if (!user) return <Navigate to="/login" replace />;
+
+  return children;
+};
+
+// Usage
+<Route
+  path="/dashboard"
+  element={
+    <ProtectedRoute>
+      <Dashboard />
+    </ProtectedRoute>
+  }
+/>;
+```
+
+### 3. Login Form Example
+
+Complete login form with React Hook Form + Zod validation:
+
+```jsx
+// pages/LoginPage.jsx
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+
+const loginSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+function LoginPage() {
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const [loginError, setLoginError] = useState("");
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = async (data) => {
+    try {
+      setLoginError("");
+      await login(data.email, data.password);
+      navigate("/dashboard"); // Redirect after successful login
+    } catch (error) {
+      setLoginError("Invalid email or password");
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="bg-white p-8 rounded-lg shadow-md w-96">
+        <h2 className="text-2xl font-bold mb-6">Login</h2>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Email Field */}
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium mb-1">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              {...register("email")}
+              className={`w-full px-3 py-2 border rounded-md ${
+                errors.email ? "border-red-500" : "border-gray-300"
+              }`}
+            />
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.email.message}
+              </p>
+            )}
+          </div>
+
+          {/* Password Field */}
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium mb-1"
+            >
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              {...register("password")}
+              className={`w-full px-3 py-2 border rounded-md ${
+                errors.password ? "border-red-500" : "border-gray-300"
+              }`}
+            />
+            {errors.password && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.password.message}
+              </p>
+            )}
+          </div>
+
+          {/* Login Error */}
+          {loginError && <p className="text-red-500 text-sm">{loginError}</p>}
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 disabled:bg-blue-300"
+          >
+            {isSubmitting ? "Logging in..." : "Login"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+export default LoginPage;
+```
+
+---
+
+## 29. Key Prop Deep Dive (Critical Understanding)
+
+### 1. Why Key Matters
+
+- React reconciliation algorithm
+- Performance implications
+- Wrong key = bugs
+
+### 2. Key Selection Rules
+
+```jsx
+// ❌ NEVER if list can reorder
+{
+  items.map((item, index) => <div key={index}>{item}</div>);
+}
+
+// ✅ USE unique ID
+{
+  items.map((item) => <div key={item.id}>{item.name}</div>);
+}
+
+// ✅ Composite key if no ID
+{
+  items.map((item) => <div key={`${item.category}-${item.name}`}>...</div>);
+}
+```
+
+### 3. When Index Key is OK
+
+- Static lists that never change
+- No sorting, filtering, reordering
+
+---
+
+## 30. Complete CRUD Project (Task Manager)
+
+একটি production-ready Task Manager app যেখানে সব concept একসাথে আসবে:
+
+### 1. Project Structure
+
+```
+src
+  /components
+    /ui (Button, Input, Modal)
+    /TaskList.jsx
+    /TaskForm.jsx
+    /TaskItem.jsx
+  /context
+    /AuthContext.jsx
+  /hooks
+    /useTasks.js
+  /services
+    /api.js
+    /taskService.js
+  /pages
+    /LoginPage.jsx
+    /TasksPage.jsx
+  /config
+    /index.js
+  App.jsx
+```
+
+### 2. Features to Implement
+
+- Authentication (login/logout)
+- List tasks (GET)
+- Add task (POST)
+- Edit task (PUT)
+- Delete task (DELETE)
+- Mark complete (PATCH)
+- Search tasks (debounced)
+- Filter by status
+- Loading states
+- Error boundaries
+- Empty states
+
+### 3. Complete Code for Each File
+
+যেহেতু সব files এর code দিলে note অনেক বড় হবে, তাই একটি key file এর complete example দিন:
+
+```jsx
+// components/TaskList.jsx - Complete Example
+import { useState } from "react";
+import { useTasks } from "../hooks/useTasks";
+import TaskItem from "./TaskItem";
+import TaskForm from "./TaskForm";
+
+function TaskList() {
+  const { data: tasks, isLoading, error } = useTasks();
+  const [filter, setFilter] = useState("all"); // all, active, completed
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Filter tasks
+  const filteredTasks = tasks?.filter((task) => {
+    const matchesSearch = task.title
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const matchesFilter =
+      filter === "all" ||
+      (filter === "active" && !task.completed) ||
+      (filter === "completed" && task.completed);
+    return matchesSearch && matchesFilter;
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <p className="text-red-600">Error: {error.message}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6">Task Manager</h1>
+
+      {/* Add Task Form */}
+      <TaskForm />
+
+      {/* Search and Filter */}
+      <div className="flex gap-4 mb-6 mt-6">
+        <input
+          type="text"
+          placeholder="Search tasks..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="flex-1 px-4 py-2 border rounded-lg"
+        />
+
+        <div className="flex gap-2">
+          <button
+            onClick={() => setFilter("all")}
+            className={`px-4 py-2 rounded-lg ${
+              filter === "all" ? "bg-blue-500 text-white" : "bg-gray-200"
+            }`}
+          >
+            All
+          </button>
+          <button
+            onClick={() => setFilter("active")}
+            className={`px-4 py-2 rounded-lg ${
+              filter === "active" ? "bg-blue-500 text-white" : "bg-gray-200"
+            }`}
+          >
+            Active
+          </button>
+          <button
+            onClick={() => setFilter("completed")}
+            className={`px-4 py-2 rounded-lg ${
+              filter === "completed" ? "bg-blue-500 text-white" : "bg-gray-200"
+            }`}
+          >
+            Completed
+          </button>
+        </div>
+      </div>
+
+      {/* Empty State */}
+      {filteredTasks?.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-gray-500 text-lg">No tasks found</p>
+        </div>
+      )}
+
+      {/* Task List */}
+      <div className="space-y-3">
+        {filteredTasks?.map((task) => (
+          <TaskItem key={task.id} task={task} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default TaskList;
+```
+
+এই example টি দেখালেই বোঝা যাবে কিভাবে সব concepts একসাথে use করতে হয়। বাকি files এর জন্য শুধু structure উল্লেখ থাকলেই চলবে।
+
+### 4. Step-by-Step Build Guide
+
+- Setup dependencies
+- Create folder structure
+- Build API layer
+- Create hooks
+- Build UI components
+- Wire everything together
+- Add error handling
+- Test all features
+
+---
+
+## 31. Deployment (Production Ready)
+
+### 1. Build for Production
+
+```bash
+npm run build
+```
+
+- কি হয় build folder এ
+- Environment variables production এ
+
+### 2. Deploy to Vercel (Step-by-Step)
+
+- Vercel account তৈরি
+- Project import
+- Environment variables setup
+- Deploy button click
+- Custom domain (optional)
+
+### 3. Deploy to Netlify
+
+- Alternative approach
+- Build settings configure
+- Redirects for SPA routing
+
+### 4. Common Deployment Issues
+
+- 404 on page refresh (SPA routing fix)
+- API CORS errors
+- Environment variables not loading
+- Build failures
+
+---
+
+## 32. Production Checklist
+
+Project deploy করার আগে check করুন:
+
+**Code Quality:**
+
+- [ ] All console.log removed
+- [ ] No commented code
+- [ ] ESLint warnings fixed
+- [ ] Proper error handling everywhere
+- [ ] Loading states for all async operations
+- [ ] Empty states handled
+
+**Performance:**
+
+- [ ] Images optimized
+- [ ] Lazy loading where appropriate
+- [ ] No unnecessary re-renders
+- [ ] Bundle size checked
+
+**Security:**
+
+- [ ] API keys in environment variables
+- [ ] No sensitive data in code
+- [ ] HTTPS enabled
+- [ ] Input validation
+
+**User Experience:**
+
+- [ ] Responsive design (mobile, tablet, desktop)
+- [ ] Error messages user-friendly
+- [ ] Loading indicators
+- [ ] Accessibility (a11y) basics
 
 ---
 
