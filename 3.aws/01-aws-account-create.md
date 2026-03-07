@@ -60,7 +60,7 @@ Confirm root user password: আবার একই password দিন
 ```
 
 > 💡 **টিপস:** Password-এ বড় হাতের অক্ষর, সংখ্যা এবং special character (@#$) ব্যবহার করুন।
-> উদাহরণ: `MyAWS@2024Practice`
+> উদাহরণ: `MyAWS@2026Practice`
 
 **"Continue"** ক্লিক করুন।
 
@@ -195,7 +195,7 @@ Login করার পর যা দেখবেন:
 - [ ] Email confirm করা হয়েছে
 - [ ] AWS Console-এ Login করা হয়েছে
 - [ ] Region → Singapore সেট করা হয়েছে
-- [ ] (ঐচ্ছিক) MFA চালু করা হয়েছে
+- [ ] MFA চালু করা হয়েছে (বাধ্যতামূলক)
 
 ---
 

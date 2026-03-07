@@ -9,14 +9,15 @@
 
 ## 📚 গাইডের সূচিপত্র
 
-| ধাপ | ফাইল                                                   | বিষয়                          | সময়      |
-| --- | ------------------------------------------------------ | ------------------------------ | --------- |
-| ১   | [01-aws-account-create.md](./01-aws-account-create.md) | AWS একাউন্ট তৈরি (Free Tier)   | ~১৫ মিনিট |
-| ২   | [02-ec2-instance-setup.md](./02-ec2-instance-setup.md) | EC2 Instance তৈরি ও কনফিগার    | ~২০ মিনিট |
-| ৩   | [03-ssh-connect.md](./03-ssh-connect.md)               | SSH দিয়ে Server-এ প্রবেশ      | ~১০ মিনিট |
-| ৪   | [04-nodejs-install.md](./04-nodejs-install.md)         | Node.js ও npm ইনস্টল           | ~১০ মিনিট |
-| ৫   | [05-react-deploy.md](./05-react-deploy.md)             | React Project Deploy ও রান     | ~২০ মিনিট |
-| ৬   | [06-vscode-and-sharing.md](./06-vscode-and-sharing.md) | VS Code কানেকশন ও এক্সেস শেয়ার | ~১৫ মিনিট |
+| ধাপ | ফাইল                                                   | বিষয়                           | সময়      |
+| --- | ------------------------------------------------------ | ------------------------------- | --------- |
+| ১   | [01-aws-account-create.md](./01-aws-account-create.md) | AWS একাউন্ট তৈরি (Free Tier)    | ~১৫ মিনিট |
+| ২   | [02-ec2-instance-setup.md](./02-ec2-instance-setup.md) | EC2 Instance তৈরি ও কনফিগার     | ~২০ মিনিট |
+| ৩   | [03-ssh-connect.md](./03-ssh-connect.md)               | SSH দিয়ে Server-এ প্রবেশ       | ~১০ মিনিট |
+| ৪   | [04-nodejs-install.md](./04-nodejs-install.md)         | Node.js ও npm ইনস্টল            | ~১০ মিনিট |
+| ৫   | [05-project-to-server.md](./05-project-to-server.md)   | Project কোড Server-এ আনা        | ~২০ মিনিট |
+| ৬   | [06-react-deploy.md](./06-react-deploy.md)             | React App Deploy (Nginx/Docker) | ~৩০ মিনিট |
+| ৭   | [07-vscode-and-sharing.md](./07-vscode-and-sharing.md) | VS Code কানেকশন ও এক্সেস শেয়ার | ~১৫ মিনিট |
 
 ---
 

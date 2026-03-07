@@ -2,7 +2,7 @@
 
 > **সময়:** প্রায় ১০ মিনিট
 > **আগের ধাপ:** [← SSH Connect](./03-ssh-connect.md)
-> **পরবর্তী ধাপ:** [React Deploy →](./05-react-deploy.md)
+> **পরবর্তী ধাপ:** [Project কোড Server-এ আনা →](./05-project-to-server.md)
 
 ---
 
@@ -128,10 +128,10 @@ console.log("Hello from AWS Server!")
 
 - [ ] Node.js 24.x ইনস্টল হয়েছে (`node --version` কাজ করছে)
 - [ ] npm ইনস্টল হয়েছে (`npm --version` কাজ করছে)
-- [ ] Quick test সফল হয়েছে (ধাপ ৪.৭)
+- [ ] Quick test সফল হয়েছে
 
 ---
 
 ## ➡️ পরবর্তী ধাপ
 
-[**ধাপ ৫: React Project Deploy ও রান করুন →**](./05-react-deploy.md)
+[**ধাপ ৫: Project কোড Server-এ নিয়ে আসুন →**](./05-project-to-server.md)
