@@ -50,7 +50,7 @@ curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
 এই command কিছুটা সময় নেবে। শেষে এরকম দেখাবে:
 
 ```
-## Run `sudo apt-get install -y nodejs` to install Node.js 24.x...
+## To install Node.js, run: apt install nodejs -y
 ```
 
 ---
@@ -58,7 +58,7 @@ curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
 ### ধাপ ৪.৩ — Node.js ইনস্টল করুন
 
 ```bash
-sudo apt-get install -y nodejs
+sudo apt install nodejs -y
 ```
 
 ---
