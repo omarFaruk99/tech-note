@@ -116,7 +116,7 @@ ubuntu@ip-172-31-XX-XX:~$
 
 ## 🔄 Server আপডেট করুন
 
-Server-এ ঢোকার পর প্রথম কাজ হলো সব Software আপডেট করা:
+Server-এ ঢোকার পর আপনার প্রথম কাজ হলো সব Software আপডেট করা। এটি আপনি আপনার **Server-এর ভেতরে** ঢোকার পর যেকোনো ডিরেক্টরি (যেমন: Home Directory) থেকে চালাতে পারেন:
 
 ```bash
 # Package list আপডেট করুন
@@ -128,8 +128,8 @@ sudo apt upgrade -y
 
 এই command চলার সময় অনেক text দেখাবে — এটা স্বাভাবিক। শেষ হলে আবার `$` prompt দেখাবে।
 
-> 💡 `sudo` মানে "Super User Do" — এটা Admin/Root permission দিয়ে command চালায়।
-> `apt` হলো Ubuntu-র package manager (software installer)।
+> 💡 **নোট:** ২০২৬ সালের সিকিউরিটি আপডেট পেতে এটি নিয়মিত করা ভালো।
+> `sudo` মানে "Super User Do" — এটি Admin permission দিয়ে কাজ করে।
 
 ---
 
@@ -175,17 +175,39 @@ exit
 
 ---
 
-## 🛠️ SSH Command সহজ করুন (ঐচ্ছিক)
+## 🛠️ SSH Command সহজ ও ছোট করুন (খুবই কাজের!)
 
-প্রতিবার লম্বা command টাইপ না করে একটি Alias তৈরি করুন:
+প্রতিবার লম্বা IP আর Key ফাইলের পথ টাইপ করা বিরক্তির। যখন আপনি নিশ্চিত হবেন যে আপনি ম্যানুয়ালি কানেক্ট করতে পারছেন, তখন নিচের যেকোনো একটি পদ্ধতি ব্যবহার করুন:
+
+### পদ্ধতি ১: Alias তৈরি করা (সহজ)
+
+আপনার **Local PC (আপনার নিজের কম্পিউটার)**-র Terminal-এ এই কমান্ডটি একবার চালান:
 
 ```bash
-# আপনার PC-র Terminal-এ (Server-এ না) চালান:
-echo 'alias myserver="ssh -i ~/.ssh/my-react-server-key.pem ubuntu@YOUR_SERVER_IP"' >> ~/.bashrc
+echo 'alias aws="ssh -i ~/.ssh/my-react-server-key.pem ubuntu@YOUR_SERVER_IP"' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-এরপর শুধু `myserver` টাইপ করলেই connect হবে!
+এরপর থেকে শুধু `aws` লিখে এন্টার দিলেই আপনি সার্ভারে ঢুকে যাবেন!
+
+### পদ্ধতি ২: SSH Config ফাইল ব্যবহার করা (সেরা পদ্ধতি)
+
+এটি প্রফেশনাল এবং VS Code-এর জন্য সবচেয়ে ভালো। আপনার লোকাল পিসিতে নিচের ফাইলটি খুলুন/তৈরি করুন:
+
+```bash
+nano ~/.ssh/config
+```
+
+সেখানে নিচের কোডটুকু লিখে Ctrl+O এবং Ctrl+X দিয়ে সেভ করুন:
+
+```text
+Host myserver
+    HostName YOUR_SERVER_IP
+    User ubuntu
+    IdentityFile ~/.ssh/my-react-server-key.pem
+```
+
+এখন থেকে আপনি শুধু `ssh myserver` লিখলেই কানেক্ট হবে। এমনকি VS Code-ও এই নাম চিনে নিবে!
 
 ---
 
